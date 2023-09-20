@@ -15,14 +15,18 @@ on categories.category_id = products.category_id
 GROUP BY category_name;
 
 -- 3
-SELECT customers.contact_name ,avg((order_Details.unit_price * quantity)*(1-discount)) AS avg_Sale
-FROM customers INNER JcOIN orders
-ON orders.customer_id = customers.customer_id
-INNER JOIN order_details
+--new version
+WITH sale_by_id AS (SELECT  orders.order_id as salee , sum((order_Details.unit_price * quantity)*(1-discount)) AS sale
+from orders INNER JOIN order_details
 ON orders.order_id = order_details.order_id
-GROUP BY customers.contact_name
-ORDER BY avg_Sale DESC;
-
+GROUP BY orders.order_id)
+SELECT orders.customer_id as namee, avg(sale_by_id.sale) as avg_total
+FROM customers INNER JOIN orders
+ON customers.customer_id = orders.customer_id
+INNER JOIN sale_by_id
+ON orders.order_id = sale_by_id.salee
+GROUP BY orders.customer_id
+ORDER BY avg_total DESC;
 
 -- 4
 SELECT customers.contact_name ,sum((order_Details.unit_price * quantity)*(1-discount)) AS total_spent
